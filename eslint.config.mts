@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import prettier from 'eslint-config-prettier/flat';
 import playwright from 'eslint-plugin-playwright';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
@@ -22,8 +23,10 @@ export default defineConfig(
       'no-restricted-syntax': [
         'error',
         {
-          selector: "CallExpression[callee.property.name='locator'] > Literal[value=/^(\\/\\/|xpath=)/]",
-          message: 'XPath is not allowed. Use getByRole/getByLabel/getByTestId, or CSS as a last resort.',
+          selector:
+            "CallExpression[callee.property.name='locator'] > Literal[value=/^(\\/\\/|xpath=)/]",
+          message:
+            'XPath is not allowed. Use getByRole/getByLabel/getByTestId, or CSS as a last resort.',
         },
       ],
     },
@@ -54,4 +57,7 @@ export default defineConfig(
       'playwright/require-tags': 'error',
     },
   },
+
+  // Last, so formatting is Prettier's job only.
+  prettier,
 );
