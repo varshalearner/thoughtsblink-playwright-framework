@@ -5,7 +5,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  globalIgnores(['test-results/', 'playwright-report/', 'blob-report/', 'docs/']),
+  globalIgnores(['test-results/', 'playwright-report/', 'blob-report/', 'reports/', 'docs/']),
 
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
