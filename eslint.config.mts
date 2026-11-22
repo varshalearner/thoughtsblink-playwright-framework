@@ -48,6 +48,8 @@ export default defineConfig(
       'playwright/no-force-option': 'error',
       'playwright/prefer-web-first-assertions': 'error',
       'playwright/no-nth-methods': 'error',
+      // Convention: page-object methods named expect* (e.g. expectLoaded) assert.
+      'playwright/expect-expect': ['error', { assertFunctionPatterns: ['^expect[A-Z]'] }],
     },
   },
 
