@@ -19,6 +19,8 @@
     "noFallthroughCasesInSwitch": true,
 
     "paths": {
+      "@fixtures": ["./src/fixtures/index.ts"],
+      "@fixtures/*": ["./src/fixtures/*"],
       "@pages/*": ["./src/pages/*"],
       "@utils/*": ["./src/utils/*"]
     }
