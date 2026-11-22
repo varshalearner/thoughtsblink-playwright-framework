@@ -14,6 +14,7 @@ test-results/
 playwright-report/
 blob-report/
 all-blob-reports/
+reports/
 playwright/.cache/
 
 # editor / OS
