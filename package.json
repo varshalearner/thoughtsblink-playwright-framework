@@ -1,0 +1,18 @@
+{
+  "name": "thoughtsblink-playwright-framework",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Playwright + TypeScript test automation framework for ThoughtsBlink Studio",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "22.20.5"
+  }
+}
