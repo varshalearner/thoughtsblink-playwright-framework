@@ -1,0 +1,34 @@
+{
+  "name": "thoughtsblink-playwright-framework",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Playwright + TypeScript test automation framework for ThoughtsBlink Studio",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.22.1"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.1",
+    "@types/node": "22.20.5",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-playwright": "2.12.2",
+    "husky": "9.1.7",
+    "jiti": "2.7.0",
+    "lint-staged": "17.6.2",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0"
+  }
+}

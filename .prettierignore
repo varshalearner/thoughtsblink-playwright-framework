@@ -1,0 +1,7 @@
+package-lock.json
+test-results/
+playwright-report/
+blob-report/
+docs/
+LICENSE
+Playwright*.md
