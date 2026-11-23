@@ -50,6 +50,8 @@ export default defineConfig(
       'playwright/no-nth-methods': 'error',
       // Convention: page-object methods named expect* (e.g. expectLoaded) assert.
       'playwright/expect-expect': ['error', { assertFunctionPatterns: ['^expect[A-Z]'] }],
+      // A forgotten test.skip() hides a test; test.skip(condition, reason) documents a real limit.
+      'playwright/no-skipped-test': ['error', { allowConditional: true }],
     },
   },
 
