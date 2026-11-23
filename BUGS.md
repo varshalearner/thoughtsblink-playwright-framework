@@ -4,14 +4,16 @@ Bugs in [ThoughtsBlink Studio](https://thoughtsblink.vercel.app) that the tests 
 
 Each open bug has a test that states the **correct** behaviour and is marked `test.fail()` with an `issue` annotation. The suite stays green while the bug exists. Once the app is fixed, the test starts passing, Playwright reports that as a failure, and that is the signal to remove the marker and close the bug here.
 
-| ID                  | Summary                                                        | Severity | Status |
-| ------------------- | -------------------------------------------------------------- | -------- | ------ |
-| [BUG-001](#bug-001) | `/api/setup/status` answers anonymous visitors                 | Low      | Open   |
-| [BUG-002](#bug-002) | Visitors can read every user's email and payout details        | High     | Open   |
-| [BUG-003](#bug-003) | Sellers can verify themselves and lift their own suspension    | High     | Open   |
-| [BUG-004](#bug-004) | Buyers can create orders marked as paid without paying         | Critical | Open   |
-| [BUG-005](#bug-005) | Any user can put notifications with any link in anyone's inbox | Medium   | Open   |
-| [BUG-006](#bug-006) | A server error makes a live artwork look sold or removed       | Low      | Open   |
+| ID                  | Summary                                                                   | Severity | Status |
+| ------------------- | ------------------------------------------------------------------------- | -------- | ------ |
+| [BUG-001](#bug-001) | `/api/setup/status` answers anonymous visitors                            | Low      | Open   |
+| [BUG-002](#bug-002) | Visitors can read every user's email and payout details                   | High     | Open   |
+| [BUG-003](#bug-003) | Sellers can verify themselves and lift their own suspension               | High     | Open   |
+| [BUG-004](#bug-004) | Buyers can create orders marked as paid without paying                    | Critical | Open   |
+| [BUG-005](#bug-005) | Any user can put notifications with any link in anyone's inbox            | Medium   | Open   |
+| [BUG-006](#bug-006) | A server error makes a live artwork look sold or removed                  | Low      | Open   |
+| [BUG-007](#bug-007) | Primary buttons and links fail colour contrast (WCAG 1.4.3)               | Medium   | Open   |
+| [BUG-008](#bug-008) | The currency button's name does not include its visible text (WCAG 2.5.3) | Low      | Open   |
 
 ## BUG-001
 
@@ -88,3 +90,21 @@ Each open bug has a test that states the **correct** behaviour and is marked `te
 - **Actual:** About 15 seconds of loading skeleton, then "This artwork has wandered off the wall. It may have been sold, paused, or the link is a little smudged."
 - **Cause:** `artwork-detail.tsx` checks `isLoading` and `!artwork`, but not React Query's `isError`, so a failed query falls through to the not-found state. The 15s comes from measured retries: supabase-js tries 4 times (1s, 2s, 4s backoff) and React Query repeats that once (`retry: 1`), 8 requests in total.
 - **Suggested fix:** Render an error state with a "Try again" button (`refetch`) when `isError` is true. Other pages that load data the same way probably need the same fix.
+
+## BUG-007
+
+**Primary buttons and links fail colour contrast (WCAG 1.4.3)**
+
+- **Severity:** Medium (hard to read for people with low vision; fails WCAG 2.1 AA)
+- **Test:** [tests/ui/a11y/pages.spec.ts](tests/ui/a11y/pages.spec.ts), "known violations are fixed" (axe rule `color-contrast`)
+- **Actual:** Cream text `#fbf9f3` on the brand terracotta `#c9704a` measures 3.38:1, and terracotta link text on cream `#fffcf5` measures 3.47:1. Normal-size text needs at least 4.5:1. Affected on every page: the header "Log in" button, form submit buttons and primary links such as "Create account".
+- **Suggested fix:** Darken the primary colour where it carries text: `#ad5c38` is the closest shade that passes (4.57:1 on `#fbf9f3`, 4.70:1 on `#fffcf5`), or make button text larger and bold (3:1 is enough from 18.66px bold).
+
+## BUG-008
+
+**The currency button's name does not include its visible text (WCAG 2.5.3)**
+
+- **Severity:** Low (voice-control users cannot activate it by what they see)
+- **Test:** [tests/ui/a11y/pages.spec.ts](tests/ui/a11y/pages.spec.ts), "known violations are fixed" (axe rule `label-content-name-mismatch`)
+- **Actual:** The header button shows "INR" (the current currency) but its accessible name is `aria-label="Currency"`, so saying "click INR" does nothing. The same menu also holds the language choice, which the label does not mention.
+- **Suggested fix:** Use a name that contains the visible text, for example `aria-label="Currency and language: INR"`, or drop the aria-label and add visually hidden text next to "INR".
