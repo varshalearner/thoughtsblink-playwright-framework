@@ -8,6 +8,8 @@ export class LoginPage extends BasePage {
 
   readonly emailInput: Locator;
   readonly passwordInput: Locator;
+  /** The login card: title, fields and buttons, without the site header. */
+  readonly form: Locator;
   // The header has its own "Log in" button, so the form's button is scoped to <main>.
   private readonly submitButton: Locator;
 
@@ -16,6 +18,7 @@ export class LoginPage extends BasePage {
     this.emailInput = page.getByLabel('Email');
     this.passwordInput = page.getByLabel('Password');
     this.submitButton = page.getByRole('main').getByRole('button', { name: 'Log in' });
+    this.form = page.getByRole('main');
   }
 
   async expectLoaded(): Promise<void> {
