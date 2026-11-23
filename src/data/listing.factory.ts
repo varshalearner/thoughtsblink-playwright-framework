@@ -21,6 +21,8 @@ export function buildListing(sellerId: string, overrides: Partial<NewListing> = 
     height_cm: faker.number.int({ min: 20, max: 120 }),
     price_inr: faker.number.int({ min: 1000, max: 50000 }),
     kind: 'physical',
+    // The app's image component crashes on a listing without images; the UI never creates one.
+    images: ['/art/art-01.svg'],
     status: 'draft',
     ...overrides,
   };
