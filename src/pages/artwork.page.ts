@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { BasePage } from '@pages/base.page';
+import { ReportDialogComponent } from '@pages/components/report-dialog.component';
 import { step } from '@utils/step';
 
 /** One artwork's public page, /artwork/<slug>. */
@@ -14,9 +15,13 @@ export class ArtworkPage extends BasePage {
   readonly addToCartButton: Locator;
   /** Shown when no approved artwork has this slug. */
   readonly notFoundHeading: Locator;
+  readonly reportDialog: ReportDialogComponent;
+  private readonly reportButton: Locator;
 
   constructor(page: Page) {
     super(page);
+    this.reportDialog = new ReportDialogComponent(page);
+    this.reportButton = page.getByRole('main').getByRole('button', { name: 'Report', exact: true });
     this.title = page.getByRole('heading', { level: 1 });
     this.price = page.getByTestId('detail-price');
     this.addToCartButton = page.getByTestId('add-to-cart');
@@ -33,6 +38,11 @@ export class ArtworkPage extends BasePage {
   async openArtwork(slug: string): Promise<void> {
     await this.visitArtwork(slug);
     await this.expectLoaded();
+  }
+
+  @step()
+  async openReportDialog(): Promise<void> {
+    await this.reportButton.click();
   }
 
   /** Only navigates: for tests that expect the not-found or an error state. */
