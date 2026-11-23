@@ -38,5 +38,13 @@ export const listingSchema = z.object({
   updated_at: z.iso.datetime({ offset: true }),
 });
 
+/** PostgREST's error body; `code` is the Postgres SQLSTATE, e.g. 42501 for an RLS refusal. */
+export const postgrestErrorSchema = z.object({
+  code: z.string(),
+  message: z.string(),
+  details: z.string().nullable(),
+  hint: z.string().nullable(),
+});
+
 export type Listing = z.infer<typeof listingSchema>;
 export type ListingStatus = z.infer<typeof listingStatusSchema>;
