@@ -17,6 +17,10 @@ export default defineConfig({
 
   use: {
     baseURL: env.baseURL,
+    // The app picks its default currency from the time zone and its language from the browser,
+    // so tests pin both instead of inheriting whatever machine (or CI runner) they run on.
+    timezoneId: 'Asia/Kolkata',
+    locale: 'en-IN',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
