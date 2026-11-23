@@ -4,12 +4,13 @@ Bugs in [ThoughtsBlink Studio](https://thoughtsblink.vercel.app) that the tests 
 
 Each open bug has a test that states the **correct** behaviour and is marked `test.fail()` with an `issue` annotation. The suite stays green while the bug exists. Once the app is fixed, the test starts passing, Playwright reports that as a failure, and that is the signal to remove the marker and close the bug here.
 
-| ID                  | Summary                                                     | Severity | Status |
-| ------------------- | ----------------------------------------------------------- | -------- | ------ |
-| [BUG-001](#bug-001) | `/api/setup/status` answers anonymous visitors              | Low      | Open   |
-| [BUG-002](#bug-002) | Visitors can read every user's email and payout details     | High     | Open   |
-| [BUG-003](#bug-003) | Sellers can verify themselves and lift their own suspension | High     | Open   |
-| [BUG-004](#bug-004) | Buyers can create orders marked as paid without paying      | Critical | Open   |
+| ID                  | Summary                                                        | Severity | Status |
+| ------------------- | -------------------------------------------------------------- | -------- | ------ |
+| [BUG-001](#bug-001) | `/api/setup/status` answers anonymous visitors                 | Low      | Open   |
+| [BUG-002](#bug-002) | Visitors can read every user's email and payout details        | High     | Open   |
+| [BUG-003](#bug-003) | Sellers can verify themselves and lift their own suspension    | High     | Open   |
+| [BUG-004](#bug-004) | Buyers can create orders marked as paid without paying         | Critical | Open   |
+| [BUG-005](#bug-005) | Any user can put notifications with any link in anyone's inbox | Medium   | Open   |
 
 ## BUG-001
 
@@ -61,3 +62,16 @@ Each open bug has a test that states the **correct** behaviour and is marked `te
 - **Impact:** Anyone can take digital artworks (download links unlock on paid orders) and, because `review_requires_purchase` trusts `orders.status`, publish purchase-verified reviews on any listing. Fake paid orders also inflate admin revenue.
 - **Suggested fix:** Clients insert orders as `placed` only (policy `with check (status = 'placed')`), and the payment verify and webhook routes, using the service role, move them to `paid`.
 - **Test data:** Orders cannot be deleted by clients, so the test cancels its order in teardown. Expect one cancelled order with `payment_provider = 'e2e'` per run.
+
+## BUG-005
+
+**Any user can put notifications with any link in anyone's inbox**
+
+- **Severity:** Medium (phishing from a trusted place in the app)
+- **Test:** [tests/api/notifications/notification-spoofing.spec.ts](tests/api/notifications/notification-spoofing.spec.ts), "a user cannot send another user a notification with any link"
+- **Steps:** Signed in as any user, `POST <supabase>/rest/v1/notifications` with another user's `user_id`, any `title` and `href: "https://example.com/phishing"`, without asking for the row back.
+- **Expected:** Refused. Notifications should come only from the app's own events (an order, a review decision, a message).
+- **Actual:** 201. The message appears in the victim's notification bell, and clicking it opens the external link.
+- **Cause:** The policy `notifications insert` is `with check (auth.uid() is not null)`. It is deliberately open so buyers and sellers can notify each other from the browser.
+- **Suggested fix:** Create notifications in database triggers or server routes (service role), and close client inserts. At minimum, allow only relative `href` values.
+- **Testing note:** With `Prefer: return=representation`, PostgREST must also read the new row back, which the sender may not do, so the insert is refused for that reason alone. The first version of this test did that and wrongly suggested the bug did not exist. The client now inserts the way the app does.
