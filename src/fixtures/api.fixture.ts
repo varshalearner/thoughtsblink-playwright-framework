@@ -1,19 +1,22 @@
-import { test as base, type PlaywrightWorkerArgs } from '@playwright/test';
+import { test as base, type APIRequestContext, type PlaywrightWorkerArgs } from '@playwright/test';
 import { ListingsClient } from '@api/listings.client';
 import { signIn, supabaseHeaders, type Session } from '@api/supabase';
 import { env, type Role } from '@utils/env';
 
-/** The Supabase REST API as one user (or an anonymous visitor) sees it. */
+/** The Supabase REST API as an anonymous visitor sees it. */
 export interface SupabaseApi {
-  /** The signed-in user's id, or null for an anonymous visitor. */
-  userId: string | null;
   listings: ListingsClient;
+}
+
+/** The Supabase REST API as one signed-in user sees it. */
+export interface SignedInApi extends SupabaseApi {
+  userId: string;
 }
 
 export interface ApiFixtures {
   anonApi: SupabaseApi;
-  buyerApi: SupabaseApi;
-  artistApi: SupabaseApi;
+  buyerApi: SignedInApi;
+  artistApi: SignedInApi;
 }
 
 interface ApiWorkerFixtures {
@@ -42,26 +45,36 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
   ],
 
   anonApi: async ({ playwright }, use) => {
-    await provideApi(playwright, use);
+    await withRestContext(playwright, undefined, (request) => use(clientsFor(request)));
   },
   buyerApi: async ({ playwright, signInAs }, use) => {
-    await provideApi(playwright, use, await signInAs('buyer'));
+    const session = await signInAs('buyer');
+    await withRestContext(playwright, session, (request) =>
+      use({ userId: session.userId, ...clientsFor(request) }),
+    );
   },
   artistApi: async ({ playwright, signInAs }, use) => {
-    await provideApi(playwright, use, await signInAs('artist'));
+    const session = await signInAs('artist');
+    await withRestContext(playwright, session, (request) =>
+      use({ userId: session.userId, ...clientsFor(request) }),
+    );
   },
 });
 
-async function provideApi(
+function clientsFor(request: APIRequestContext): SupabaseApi {
+  return { listings: new ListingsClient(request) };
+}
+
+async function withRestContext(
   playwright: PlaywrightWorkerArgs['playwright'],
-  use: (api: SupabaseApi) => Promise<void>,
-  session?: Session,
+  session: Session | undefined,
+  run: (request: APIRequestContext) => Promise<void>,
 ): Promise<void> {
   const request = await playwright.request.newContext({
     // Trailing slash: relative paths such as 'listings' then resolve under /rest/v1/.
     baseURL: `${env.supabase.url}/rest/v1/`,
     extraHTTPHeaders: supabaseHeaders(session),
   });
-  await use({ userId: session?.userId ?? null, listings: new ListingsClient(request) });
+  await run(request);
   await request.dispose();
 }

@@ -11,12 +11,10 @@ export interface DataFixtures {
 
 export const test = apiTest.extend<DataFixtures>({
   createListing: async ({ artistApi }, use) => {
-    const sellerId = artistApi.userId;
-    if (!sellerId) throw new Error('createListing needs a signed-in artist');
     const created: string[] = [];
 
     await use(async (overrides) => {
-      const response = await artistApi.listings.create(buildListing(sellerId, overrides));
+      const response = await artistApi.listings.create(buildListing(artistApi.userId, overrides));
       if (!response.ok()) {
         throw new Error(`Could not create a listing: ${await response.text()}`);
       }
