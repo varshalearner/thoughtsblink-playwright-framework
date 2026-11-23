@@ -5,19 +5,30 @@ const sellerProfileSchema = z.looseObject({ verified: z.boolean(), suspended: z.
 type SellerProfile = z.infer<typeof sellerProfileSchema>;
 
 const test = base.extend<{ artistSellerProfile: SellerProfile }>({
-  /** The artist's seller profile before the test; written back afterwards, whatever happened. */
+  /** The artist's seller profile before the test; the verified flag is reset afterwards. */
   artistSellerProfile: async ({ artistApi }, use) => {
-    const response = await artistApi.profiles.find({
-      select: 'seller_profile',
-      id: `eq.${artistApi.userId}`,
-    });
-    const [row] = z
-      .tuple([z.object({ seller_profile: sellerProfileSchema })])
-      .parse(await response.json());
+    const readProfile = async (): Promise<SellerProfile> => {
+      const response = await artistApi.profiles.find({
+        select: 'seller_profile',
+        id: `eq.${artistApi.userId}`,
+      });
+      const [row] = z
+        .tuple([z.object({ seller_profile: sellerProfileSchema })])
+        .parse(await response.json());
+      return row.seller_profile;
+    };
+    const before = await readProfile();
 
-    await use(row.seller_profile);
+    await use(before);
 
-    await artistApi.profiles.update(artistApi.userId, { seller_profile: row.seller_profile });
+    // Reset only the flag, and only to false: writing the whole snapshot back would race with
+    // a parallel copy of this test (--repeat-each) whose snapshot already had verified: true.
+    if (!before.verified) {
+      const current = await readProfile();
+      await artistApi.profiles.update(artistApi.userId, {
+        seller_profile: { ...current, verified: false },
+      });
+    }
   },
 });
 
