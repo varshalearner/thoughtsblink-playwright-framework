@@ -19,6 +19,11 @@ export class ChatPage extends BasePage {
     this.sendButton = page.getByRole('button', { name: 'Send', exact: true });
   }
 
+  /** One message bubble, found by its text. */
+  message(text: string): Locator {
+    return this.messages.getByTestId('chat-message').filter({ hasText: text });
+  }
+
   @step()
   async sendMessage(text: string): Promise<void> {
     await this.messageInput.fill(text);
