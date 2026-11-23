@@ -21,9 +21,16 @@ export class ListingsClient {
     return this.request.get('listings', { params: query });
   }
 
+  /**
+   * `returnRow: false` for permission tests: reading the row back needs read permission too,
+   * so a refused read would look like a refused insert.
+   */
   @step()
-  async create(listing: NewListing): Promise<APIResponse> {
-    return this.request.post('listings', { data: listing, headers: RETURN_ROWS });
+  async create(listing: NewListing, { returnRow = true } = {}): Promise<APIResponse> {
+    return this.request.post('listings', {
+      data: listing,
+      headers: returnRow ? RETURN_ROWS : {},
+    });
   }
 
   @step()

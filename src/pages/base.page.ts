@@ -18,9 +18,16 @@ export abstract class BasePage {
   /** The one assertion a page object may own: proof that this page has rendered. */
   abstract expectLoaded(): Promise<void>;
 
+  /** Opens the page and waits until it has rendered. */
   @step()
   async open(): Promise<void> {
-    await this.page.goto(this.path);
+    await this.visit();
     await this.expectLoaded();
+  }
+
+  /** Only navigates: for tests that expect to be sent elsewhere, e.g. to the login page. */
+  @step()
+  async visit(): Promise<void> {
+    await this.page.goto(this.path);
   }
 }

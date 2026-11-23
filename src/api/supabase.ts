@@ -5,7 +5,12 @@ import { env, type Credentials } from '@utils/env';
 export interface Session {
   accessToken: string;
   userId: string;
+  /** The full Auth response: supabase-js keeps exactly this object in localStorage. */
+  stored: Record<string, unknown>;
 }
+
+/** The localStorage key supabase-js uses, built from the project ref in the Supabase URL. */
+export const SUPABASE_STORAGE_KEY = `sb-${new URL(env.supabase.url).hostname.split('.')[0] ?? ''}-auth-token`;
 
 /** Headers for a Supabase call: the project key, plus the user's token when signed in. */
 export function supabaseHeaders(session?: Session): Record<string, string> {
@@ -31,7 +36,7 @@ export async function signIn(
     );
   }
   const session = sessionSchema.parse(await response.json());
-  return { accessToken: session.access_token, userId: session.user.id };
+  return { accessToken: session.access_token, userId: session.user.id, stored: session };
 }
 
 /** Ends the session, so a token leaked in a report can no longer change the account. */

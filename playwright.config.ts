@@ -26,8 +26,30 @@ export default defineConfig({
     // API tests do not depend on a browser, so running them once per browser would only
     // triple the run time and the logins against Supabase's auth rate limit.
     { name: 'api', testDir: './tests/api' },
-    { name: 'chromium', testDir: './tests/ui', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', testDir: './tests/ui', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', testDir: './tests/ui', use: { ...devices['Desktop Safari'] } },
+    // Signs every role in once per run; browser projects reuse the saved states in .auth/.
+    {
+      name: 'setup',
+      testDir: './tests/setup',
+      testMatch: /.*\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'chromium',
+      testDir: './tests/ui',
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      testDir: './tests/ui',
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      testDir: './tests/ui',
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Safari'] },
+    },
   ],
 });

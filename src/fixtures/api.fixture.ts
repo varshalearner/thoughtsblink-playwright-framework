@@ -1,6 +1,8 @@
 import { test as base, type APIRequestContext, type PlaywrightWorkerArgs } from '@playwright/test';
 import { AppApiClient } from '@api/app.client';
 import { ListingsClient } from '@api/listings.client';
+import { NotificationsClient } from '@api/notifications.client';
+import { OrdersClient } from '@api/orders.client';
 import { ProfilesClient } from '@api/profiles.client';
 import { signIn, signOut, supabaseHeaders, type Session } from '@api/supabase';
 import { env, type Role } from '@utils/env';
@@ -9,6 +11,8 @@ import { env, type Role } from '@utils/env';
 export interface SupabaseApi {
   listings: ListingsClient;
   profiles: ProfilesClient;
+  orders: OrdersClient;
+  notifications: NotificationsClient;
 }
 
 /** The Supabase REST API as one signed-in user sees it. */
@@ -77,7 +81,12 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
 });
 
 function clientsFor(request: APIRequestContext): SupabaseApi {
-  return { listings: new ListingsClient(request), profiles: new ProfilesClient(request) };
+  return {
+    listings: new ListingsClient(request),
+    profiles: new ProfilesClient(request),
+    orders: new OrdersClient(request),
+    notifications: new NotificationsClient(request),
+  };
 }
 
 async function withRestContext(
