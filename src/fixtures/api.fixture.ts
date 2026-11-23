@@ -5,6 +5,8 @@ import { env, type Role } from '@utils/env';
 
 /** The Supabase REST API as one user (or an anonymous visitor) sees it. */
 export interface SupabaseApi {
+  /** The signed-in user's id, or null for an anonymous visitor. */
+  userId: string | null;
   listings: ListingsClient;
 }
 
@@ -60,6 +62,6 @@ async function provideApi(
     baseURL: `${env.supabase.url}/rest/v1/`,
     extraHTTPHeaders: supabaseHeaders(session),
   });
-  await use({ listings: new ListingsClient(request) });
+  await use({ userId: session?.userId ?? null, listings: new ListingsClient(request) });
   await request.dispose();
 }
