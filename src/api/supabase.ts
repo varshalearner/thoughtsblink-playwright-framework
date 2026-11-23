@@ -33,3 +33,10 @@ export async function signIn(
   const session = sessionSchema.parse(await response.json());
   return { accessToken: session.access_token, userId: session.user.id };
 }
+
+/** Ends the session, so a token leaked in a report can no longer change the account. */
+export async function signOut(request: APIRequestContext, session: Session): Promise<void> {
+  await request.post(`${env.supabase.url}/auth/v1/logout?scope=local`, {
+    headers: supabaseHeaders(session),
+  });
+}

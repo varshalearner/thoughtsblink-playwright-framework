@@ -2,7 +2,7 @@ import { test as base, type APIRequestContext, type PlaywrightWorkerArgs } from 
 import { AppApiClient } from '@api/app.client';
 import { ListingsClient } from '@api/listings.client';
 import { ProfilesClient } from '@api/profiles.client';
-import { signIn, supabaseHeaders, type Session } from '@api/supabase';
+import { signIn, signOut, supabaseHeaders, type Session } from '@api/supabase';
 import { env, type Role } from '@utils/env';
 
 /** The Supabase REST API as an anonymous visitor sees it. */
@@ -44,6 +44,12 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
         }
         return session;
       });
+      // A failed API call prints its request headers, bearer token included, into the report.
+      // The token keeps working against REST until it expires, but once signed out it can no
+      // longer change the account's email or password.
+      for (const result of await Promise.allSettled(sessions.values())) {
+        if (result.status === 'fulfilled') await signOut(request, result.value);
+      }
       await request.dispose();
     },
     { scope: 'worker' },
