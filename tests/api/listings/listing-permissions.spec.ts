@@ -8,7 +8,9 @@ const RAISED_BY_TRIGGER = 'P0001';
 
 test.describe('Listing permissions', { tag: ['@api', '@regression'] }, () => {
   test('a visitor cannot create a listing', async ({ anonApi, artistApi }) => {
-    const response = await anonApi.listings.create(buildListing(artistApi.userId));
+    const response = await anonApi.listings.create(buildListing(artistApi.userId), {
+      returnRow: false,
+    });
 
     expect(response.status()).toBe(401);
     expect(postgrestErrorSchema.parse(await response.json())).toMatchObject({
@@ -17,7 +19,9 @@ test.describe('Listing permissions', { tag: ['@api', '@regression'] }, () => {
   });
 
   test('a buyer who is not a seller cannot create a listing', async ({ buyerApi }) => {
-    const response = await buyerApi.listings.create(buildListing(buyerApi.userId));
+    const response = await buyerApi.listings.create(buildListing(buyerApi.userId), {
+      returnRow: false,
+    });
 
     expect(response.status()).toBe(403);
     expect(postgrestErrorSchema.parse(await response.json())).toMatchObject({
@@ -26,7 +30,9 @@ test.describe('Listing permissions', { tag: ['@api', '@regression'] }, () => {
   });
 
   test('an artist cannot create a listing for another user', async ({ artistApi, buyerApi }) => {
-    const response = await artistApi.listings.create(buildListing(buyerApi.userId));
+    const response = await artistApi.listings.create(buildListing(buyerApi.userId), {
+      returnRow: false,
+    });
 
     expect(response.status()).toBe(403);
   });
@@ -34,6 +40,7 @@ test.describe('Listing permissions', { tag: ['@api', '@regression'] }, () => {
   test('an artist cannot publish a listing without review', async ({ artistApi }) => {
     const response = await artistApi.listings.create(
       buildListing(artistApi.userId, { status: 'approved' }),
+      { returnRow: false },
     );
 
     expect(response.status()).toBe(403);
