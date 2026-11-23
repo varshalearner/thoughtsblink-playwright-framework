@@ -11,18 +11,19 @@ export interface DataFixtures {
   chatThreadId: string;
 }
 
-const E2E_THREAD_CONTEXT = { type: 'general', id: TEST_DATA_PREFIX };
 const threadRowsSchema = z.array(z.object({ id: z.uuid() }));
 
 export const test = apiTest.extend<DataFixtures>({
-  // Reused, not created per test: clients cannot delete threads or messages, so one long-lived
-  // conversation keeps test data in a single place instead of a new thread every run.
-  chatThreadId: async ({ buyerApi, artistApi }, use) => {
+  // Reused, not created per test: clients cannot delete threads or messages. One thread per
+  // parallel slot: tests in the same slot never run at once, so they cannot overwrite each
+  // other's thread state, and the number of threads stays bounded by the worker count.
+  chatThreadId: async ({ buyerApi, artistApi }, use, testInfo) => {
     const participants = `{${buyerApi.userId},${artistApi.userId}}`;
+    const contextId = `${TEST_DATA_PREFIX}-${String(testInfo.parallelIndex)}`;
     const existing = await buyerApi.chat.findThreads({
       select: 'id',
       participant_ids: `cs.${participants}`,
-      'context->>id': `eq.${TEST_DATA_PREFIX}`,
+      'context->>id': `eq.${contextId}`,
       order: 'created_at.asc',
       limit: '1',
     });
@@ -31,8 +32,8 @@ export const test = apiTest.extend<DataFixtures>({
       const created = await buyerApi.chat.createThread({
         participant_ids: [buyerApi.userId, artistApi.userId],
         participant_names: { [buyerApi.userId]: 'E2E buyer', [artistApi.userId]: 'E2E artist' },
-        context: E2E_THREAD_CONTEXT,
-        context_label: `[${TEST_DATA_PREFIX}] test conversation`,
+        context: { type: 'general', id: contextId },
+        context_label: `[${TEST_DATA_PREFIX}] test conversation ${String(testInfo.parallelIndex)}`,
       });
       [thread] = threadRowsSchema.length(1).parse(await created.json());
     }
