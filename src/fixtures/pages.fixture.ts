@@ -2,6 +2,7 @@ import { test as base, type Page } from '@playwright/test';
 import { ReviewQueuePage } from '@pages/admin/review-queue.page';
 import { ArtistsPage } from '@pages/artists.page';
 import { ArtworkPage } from '@pages/artwork.page';
+import { ChatPage } from '@pages/chat.page';
 import { HomePage } from '@pages/home.page';
 import { LoginPage } from '@pages/login.page';
 import { ShopPage } from '@pages/shop.page';
@@ -13,6 +14,7 @@ export interface PageFixtures {
   artworkPage: ArtworkPage;
   reviewQueuePage: ReviewQueuePage;
   loginPage: LoginPage;
+  chatPage: ChatPage;
 }
 
 /** Every page object bound to one page, for pages the fixtures below do not own. */
@@ -25,6 +27,7 @@ export function pagesFor(page: Page): PageFixtures & { page: Page } {
     artworkPage: new ArtworkPage(page),
     reviewQueuePage: new ReviewQueuePage(page),
     loginPage: new LoginPage(page),
+    chatPage: new ChatPage(page),
   };
 }
 
@@ -46,5 +49,8 @@ export const test = base.extend<PageFixtures>({
   },
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
+  },
+  chatPage: async ({ page }, use) => {
+    await use(new ChatPage(page));
   },
 });

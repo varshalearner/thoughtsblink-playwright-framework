@@ -11,6 +11,7 @@ Each open bug has a test that states the **correct** behaviour and is marked `te
 | [BUG-003](#bug-003) | Sellers can verify themselves and lift their own suspension    | High     | Open   |
 | [BUG-004](#bug-004) | Buyers can create orders marked as paid without paying         | Critical | Open   |
 | [BUG-005](#bug-005) | Any user can put notifications with any link in anyone's inbox | Medium   | Open   |
+| [BUG-006](#bug-006) | A server error makes a live artwork look sold or removed       | Low      | Open   |
 
 ## BUG-001
 
@@ -75,3 +76,15 @@ Each open bug has a test that states the **correct** behaviour and is marked `te
 - **Cause:** The policy `notifications insert` is `with check (auth.uid() is not null)`. It is deliberately open so buyers and sellers can notify each other from the browser.
 - **Suggested fix:** Create notifications in database triggers or server routes (service role), and close client inserts. At minimum, allow only relative `href` values.
 - **Testing note:** With `Prefer: return=representation`, PostgREST must also read the new row back, which the sender may not do, so the insert is refused for that reason alone. The first version of this test did that and wrongly suggested the bug did not exist. The client now inserts the way the app does.
+
+## BUG-006
+
+**A server error makes a live artwork look sold or removed**
+
+- **Severity:** Low (misleading message; a visitor may give up on an artwork that is for sale)
+- **Test:** [tests/ui/shop/artwork-errors.spec.ts](tests/ui/shop/artwork-errors.spec.ts), "a server error is not reported as a missing artwork"
+- **Steps:** Open a live artwork while the Supabase request for it fails (the test answers it with 503).
+- **Expected:** An error message with a way to try again.
+- **Actual:** About 15 seconds of loading skeleton, then "This artwork has wandered off the wall. It may have been sold, paused, or the link is a little smudged."
+- **Cause:** `artwork-detail.tsx` checks `isLoading` and `!artwork`, but not React Query's `isError`, so a failed query falls through to the not-found state. The 15s comes from measured retries: supabase-js tries 4 times (1s, 2s, 4s backoff) and React Query repeats that once (`retry: 1`), 8 requests in total.
+- **Suggested fix:** Render an error state with a "Try again" button (`refetch`) when `isError` is true. Other pages that load data the same way probably need the same fix.

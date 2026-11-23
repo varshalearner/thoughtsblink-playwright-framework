@@ -1,5 +1,6 @@
 import { test as base, type APIRequestContext, type PlaywrightWorkerArgs } from '@playwright/test';
 import { AppApiClient } from '@api/app.client';
+import { ChatClient } from '@api/chat.client';
 import { ListingsClient } from '@api/listings.client';
 import { NotificationsClient } from '@api/notifications.client';
 import { OrdersClient } from '@api/orders.client';
@@ -13,6 +14,7 @@ export interface SupabaseApi {
   profiles: ProfilesClient;
   orders: OrdersClient;
   notifications: NotificationsClient;
+  chat: ChatClient;
 }
 
 /** The Supabase REST API as one signed-in user sees it. */
@@ -86,6 +88,7 @@ function clientsFor(request: APIRequestContext): SupabaseApi {
     profiles: new ProfilesClient(request),
     orders: new OrdersClient(request),
     notifications: new NotificationsClient(request),
+    chat: new ChatClient(request),
   };
 }
 
