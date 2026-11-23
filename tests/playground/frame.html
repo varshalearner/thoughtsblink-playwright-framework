@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Greeting form</title>
+  </head>
+  <body>
+    <form>
+      <label for="name">Your name</label>
+      <input id="name" />
+      <button type="submit">Greet me</button>
+    </form>
+    <p role="status" id="greeting"></p>
+    <script>
+      document.querySelector('form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        document.getElementById('greeting').textContent =
+          `Hello, ${document.getElementById('name').value}!`;
+      });
+    </script>
+  </body>
+</html>

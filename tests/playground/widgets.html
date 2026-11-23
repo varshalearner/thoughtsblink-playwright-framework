@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Playground</title>
+  </head>
+  <body>
+    <main>
+      <h1>Widget playground</h1>
+
+      <section aria-labelledby="frame-heading">
+        <h2 id="frame-heading">Embedded form</h2>
+        <iframe src="frame.html" title="Greeting form" width="400" height="120"></iframe>
+      </section>
+
+      <section aria-labelledby="slider-heading">
+        <h2 id="slider-heading">Slider</h2>
+        <label for="brush">Brush size</label>
+        <input id="brush" type="range" min="1" max="50" step="1" value="10" />
+        <output id="brush-value" for="brush" aria-label="Current brush size">10</output>
+      </section>
+
+      <section aria-labelledby="dialogs-heading">
+        <h2 id="dialogs-heading">Browser dialogs</h2>
+        <button id="delete">Delete sketch</button>
+        <button id="rename">Rename sketch</button>
+        <p role="status" id="dialog-result"></p>
+      </section>
+    </main>
+
+    <script>
+      const brush = document.getElementById('brush');
+      const brushValue = document.getElementById('brush-value');
+      brush.addEventListener('input', () => (brushValue.textContent = brush.value));
+
+      const result = document.getElementById('dialog-result');
+      document.getElementById('delete').addEventListener('click', () => {
+        result.textContent = confirm('Delete this sketch?') ? 'Sketch deleted' : 'Kept the sketch';
+      });
+      document.getElementById('rename').addEventListener('click', () => {
+        const name = prompt('New name for the sketch', 'Untitled');
+        result.textContent = name === null ? 'Rename cancelled' : `Renamed to ${name}`;
+      });
+    </script>
+  </body>
+</html>
