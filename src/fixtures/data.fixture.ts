@@ -2,14 +2,44 @@ import { z } from 'zod';
 import { test as apiTest } from '@fixtures/api.fixture';
 import type { NewListing } from '@api/listings.client';
 import { listingSchema, type Listing } from '@api/schemas';
-import { buildListing } from '@data/listing.factory';
+import { buildListing, TEST_DATA_PREFIX } from '@data/listing.factory';
 
 export interface DataFixtures {
   /** Creates a draft listing owned by the test artist; every one is deleted after the test. */
   createListing: (overrides?: Partial<NewListing>) => Promise<Listing>;
+  /** The id of the buyer-artist test conversation. */
+  chatThreadId: string;
 }
 
+const E2E_THREAD_CONTEXT = { type: 'general', id: TEST_DATA_PREFIX };
+const threadRowsSchema = z.array(z.object({ id: z.uuid() }));
+
 export const test = apiTest.extend<DataFixtures>({
+  // Reused, not created per test: clients cannot delete threads or messages, so one long-lived
+  // conversation keeps test data in a single place instead of a new thread every run.
+  chatThreadId: async ({ buyerApi, artistApi }, use) => {
+    const participants = `{${buyerApi.userId},${artistApi.userId}}`;
+    const existing = await buyerApi.chat.findThreads({
+      select: 'id',
+      participant_ids: `cs.${participants}`,
+      'context->>id': `eq.${TEST_DATA_PREFIX}`,
+      order: 'created_at.asc',
+      limit: '1',
+    });
+    let [thread] = threadRowsSchema.parse(await existing.json());
+    if (!thread) {
+      const created = await buyerApi.chat.createThread({
+        participant_ids: [buyerApi.userId, artistApi.userId],
+        participant_names: { [buyerApi.userId]: 'E2E buyer', [artistApi.userId]: 'E2E artist' },
+        context: E2E_THREAD_CONTEXT,
+        context_label: `[${TEST_DATA_PREFIX}] test conversation`,
+      });
+      [thread] = threadRowsSchema.length(1).parse(await created.json());
+    }
+    if (!thread) throw new Error('Could not find or create the e2e chat thread');
+    await use(thread.id);
+  },
+
   createListing: async ({ artistApi }, use) => {
     const created: string[] = [];
 
