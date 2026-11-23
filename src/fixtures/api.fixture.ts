@@ -5,6 +5,7 @@ import { ListingsClient } from '@api/listings.client';
 import { NotificationsClient } from '@api/notifications.client';
 import { OrdersClient } from '@api/orders.client';
 import { ProfilesClient } from '@api/profiles.client';
+import { ReportsClient } from '@api/reports.client';
 import { StorageClient } from '@api/storage.client';
 import { signIn, signOut, supabaseHeaders, type Session } from '@api/supabase';
 import { env, type Role } from '@utils/env';
@@ -17,6 +18,7 @@ export interface SupabaseApi {
   notifications: NotificationsClient;
   chat: ChatClient;
   storage: StorageClient;
+  reports: ReportsClient;
 }
 
 /** The Supabase REST API as one signed-in user sees it. */
@@ -30,6 +32,7 @@ export interface ApiFixtures {
   anonApi: SupabaseApi;
   buyerApi: SignedInApi;
   artistApi: SignedInApi;
+  adminApi: SignedInApi;
 }
 
 interface ApiWorkerFixtures {
@@ -82,6 +85,12 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
       use({ userId: session.userId, ...clientsFor(request) }),
     );
   },
+  adminApi: async ({ playwright, signInAs }, use) => {
+    const session = await signInAs('admin');
+    await withRestContext(playwright, session, (request) =>
+      use({ userId: session.userId, ...clientsFor(request) }),
+    );
+  },
 });
 
 function clientsFor(request: APIRequestContext): SupabaseApi {
@@ -92,6 +101,7 @@ function clientsFor(request: APIRequestContext): SupabaseApi {
     notifications: new NotificationsClient(request),
     chat: new ChatClient(request),
     storage: new StorageClient(request),
+    reports: new ReportsClient(request),
   };
 }
 
