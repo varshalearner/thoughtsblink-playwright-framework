@@ -7,4 +7,5 @@ import { test as siteHealthTest } from '@fixtures/site-health.fixture';
 
 // dataTest builds on the API fixtures, so it brings anonApi, buyerApi and artistApi with it.
 export const test = mergeTests(siteHealthTest, pageErrorsTest, pagesTest, rolesTest, dataTest);
-export { expect } from '@playwright/test';
+// expect with the project's custom matchers (toMatchSchema).
+export { expect } from '@fixtures/matchers';

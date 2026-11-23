@@ -9,10 +9,8 @@ test.describe('Listings read access', { tag: '@api' }, () => {
       const response = await anonApi.listings.find({ select: '*', limit: '20' });
 
       await expect(response).toBeOK();
-      const listings = listingSchema
-        .array()
-        .min(1)
-        .parse(await response.json());
+      await expect(response).toMatchSchema(listingSchema.array().min(1));
+      const listings = listingSchema.array().parse(await response.json());
       expect(listings.filter((listing) => listing.status !== 'approved')).toEqual([]);
     },
   );
