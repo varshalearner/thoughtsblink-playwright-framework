@@ -1,12 +1,14 @@
 import { test as base, type APIRequestContext, type PlaywrightWorkerArgs } from '@playwright/test';
 import { AppApiClient } from '@api/app.client';
 import { ListingsClient } from '@api/listings.client';
+import { ProfilesClient } from '@api/profiles.client';
 import { signIn, supabaseHeaders, type Session } from '@api/supabase';
 import { env, type Role } from '@utils/env';
 
 /** The Supabase REST API as an anonymous visitor sees it. */
 export interface SupabaseApi {
   listings: ListingsClient;
+  profiles: ProfilesClient;
 }
 
 /** The Supabase REST API as one signed-in user sees it. */
@@ -69,7 +71,7 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
 });
 
 function clientsFor(request: APIRequestContext): SupabaseApi {
-  return { listings: new ListingsClient(request) };
+  return { listings: new ListingsClient(request), profiles: new ProfilesClient(request) };
 }
 
 async function withRestContext(
