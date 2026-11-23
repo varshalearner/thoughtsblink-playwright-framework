@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 import { step } from '@utils/step';
 
 export type MainNavLink = 'Browse Art' | 'Artists' | 'Commission' | 'Sell' | 'About';
+export type AccountMenuItem = 'My Account' | 'Wishlist' | 'Sell' | 'Admin' | 'Setup' | 'Log out';
 
 export class HeaderComponent {
   readonly root: Locator;
@@ -10,12 +11,24 @@ export class HeaderComponent {
   readonly accountMenu: Locator;
   /** Shown only to visitors. */
   readonly loginButton: Locator;
+  // The open menu renders in a portal at the end of <body>, outside the banner.
+  private readonly openMenu: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('banner');
     this.mainNav = this.root.getByRole('navigation', { name: 'Main' });
     this.accountMenu = this.root.getByRole('button', { name: 'My Account' });
     this.loginButton = this.root.getByRole('button', { name: 'Log in' });
+    this.openMenu = page.getByRole('menu');
+  }
+
+  accountMenuItem(name: AccountMenuItem): Locator {
+    return this.openMenu.getByRole('menuitem', { name });
+  }
+
+  @step()
+  async openAccountMenu(): Promise<void> {
+    await this.accountMenu.click();
   }
 
   @step()

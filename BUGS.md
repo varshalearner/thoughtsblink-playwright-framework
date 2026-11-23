@@ -15,7 +15,7 @@ Each open bug has a test that states the **correct** behaviour and is marked `te
 **`/api/setup/status` answers anonymous visitors**
 
 - **Severity:** Low (information disclosure and unauthenticated load)
-- **Test:** [tests/api/app/app-routes.spec.ts](tests/api/app/app-routes.spec.ts), "setup status is not available to visitors"
+- **Tests:** [tests/api/app/app-routes.spec.ts](tests/api/app/app-routes.spec.ts), "setup status is not available to visitors"; [tests/ui/auth/account-menu.spec.ts](tests/ui/auth/account-menu.spec.ts), "does not offer the setup page" (the account menu shows "Setup" to every signed-in user, not only admins)
 - **Steps:** `curl https://thoughtsblink.vercel.app/api/setup/status` without signing in.
 - **Expected:** 401 or 403. The app README describes the setup page as admin-only.
 - **Actual:** 200 with the full configuration report: whether the service-role key and each payment and email secret are set, whether an admin account exists, and which tables are missing.
