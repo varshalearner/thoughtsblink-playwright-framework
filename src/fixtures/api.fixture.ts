@@ -5,6 +5,7 @@ import { ListingsClient } from '@api/listings.client';
 import { NotificationsClient } from '@api/notifications.client';
 import { OrdersClient } from '@api/orders.client';
 import { ProfilesClient } from '@api/profiles.client';
+import { StorageClient } from '@api/storage.client';
 import { signIn, signOut, supabaseHeaders, type Session } from '@api/supabase';
 import { env, type Role } from '@utils/env';
 
@@ -15,6 +16,7 @@ export interface SupabaseApi {
   orders: OrdersClient;
   notifications: NotificationsClient;
   chat: ChatClient;
+  storage: StorageClient;
 }
 
 /** The Supabase REST API as one signed-in user sees it. */
@@ -89,6 +91,7 @@ function clientsFor(request: APIRequestContext): SupabaseApi {
     orders: new OrdersClient(request),
     notifications: new NotificationsClient(request),
     chat: new ChatClient(request),
+    storage: new StorageClient(request),
   };
 }
 

@@ -5,6 +5,7 @@ import { ArtworkPage } from '@pages/artwork.page';
 import { ChatPage } from '@pages/chat.page';
 import { HomePage } from '@pages/home.page';
 import { LoginPage } from '@pages/login.page';
+import { NewListingPage } from '@pages/sell/new-listing.page';
 import { ShopPage } from '@pages/shop.page';
 
 export interface PageFixtures {
@@ -15,6 +16,7 @@ export interface PageFixtures {
   reviewQueuePage: ReviewQueuePage;
   loginPage: LoginPage;
   chatPage: ChatPage;
+  newListingPage: NewListingPage;
 }
 
 /** Every page object bound to one page, for pages the fixtures below do not own. */
@@ -28,6 +30,7 @@ export function pagesFor(page: Page): PageFixtures & { page: Page } {
     reviewQueuePage: new ReviewQueuePage(page),
     loginPage: new LoginPage(page),
     chatPage: new ChatPage(page),
+    newListingPage: new NewListingPage(page),
   };
 }
 
@@ -52,5 +55,8 @@ export const test = base.extend<PageFixtures>({
   },
   chatPage: async ({ page }, use) => {
     await use(new ChatPage(page));
+  },
+  newListingPage: async ({ page }, use) => {
+    await use(new NewListingPage(page));
   },
 });
