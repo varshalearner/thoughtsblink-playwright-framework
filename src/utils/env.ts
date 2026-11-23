@@ -51,7 +51,8 @@ if (!parsed.success) {
 const data = parsed.data;
 const name = data.TEST_ENV;
 
-export type Role = 'buyer' | 'artist' | 'admin';
+export const ROLES = ['buyer', 'artist', 'admin'] as const;
+export type Role = (typeof ROLES)[number];
 
 export interface Credentials {
   email: string;

@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
-export const sessionSchema = z.object({
+// Loose: the browser session needs every field Auth returns (refresh_token, expires_at, ...).
+export const sessionSchema = z.looseObject({
   access_token: z.string().min(1),
-  user: z.object({ id: z.uuid() }),
+  refresh_token: z.string().min(1),
+  expires_at: z.number().int(),
+  user: z.looseObject({ id: z.uuid() }),
 });
 
 export const listingStatusSchema = z.enum([
