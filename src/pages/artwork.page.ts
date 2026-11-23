@@ -10,11 +10,14 @@ export class ArtworkPage extends BasePage {
   readonly title: Locator;
   /** The price in the visitor's currency. A plain paragraph, so the app's test id is used. */
   readonly price: Locator;
+  /** Reads "Add to Cart" or "Sold" depending on stock, so the test id is the stable handle. */
+  readonly addToCartButton: Locator;
 
   constructor(page: Page) {
     super(page);
     this.title = page.getByRole('heading', { level: 1 });
     this.price = page.getByTestId('detail-price');
+    this.addToCartButton = page.getByTestId('add-to-cart');
   }
 
   async expectLoaded(): Promise<void> {
