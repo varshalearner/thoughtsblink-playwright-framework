@@ -3,6 +3,7 @@ import { ReviewQueuePage } from '@pages/admin/review-queue.page';
 import { ArtistsPage } from '@pages/artists.page';
 import { ArtworkPage } from '@pages/artwork.page';
 import { HomePage } from '@pages/home.page';
+import { LoginPage } from '@pages/login.page';
 import { ShopPage } from '@pages/shop.page';
 
 export interface PageFixtures {
@@ -11,6 +12,7 @@ export interface PageFixtures {
   artistsPage: ArtistsPage;
   artworkPage: ArtworkPage;
   reviewQueuePage: ReviewQueuePage;
+  loginPage: LoginPage;
 }
 
 /** Every page object bound to one page, for pages the fixtures below do not own. */
@@ -22,6 +24,7 @@ export function pagesFor(page: Page): PageFixtures & { page: Page } {
     artistsPage: new ArtistsPage(page),
     artworkPage: new ArtworkPage(page),
     reviewQueuePage: new ReviewQueuePage(page),
+    loginPage: new LoginPage(page),
   };
 }
 
@@ -40,5 +43,8 @@ export const test = base.extend<PageFixtures>({
   },
   reviewQueuePage: async ({ page }, use) => {
     await use(new ReviewQueuePage(page));
+  },
+  loginPage: async ({ page }, use) => {
+    await use(new LoginPage(page));
   },
 });
