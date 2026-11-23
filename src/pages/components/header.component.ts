@@ -3,6 +3,8 @@ import { step } from '@utils/step';
 
 export type MainNavLink = 'Browse Art' | 'Artists' | 'Commission' | 'Sell' | 'About';
 export type Currency = 'INR' | 'USD' | 'EUR' | 'GBP';
+/** Language names as the menu shows them, each in its own script. */
+export type Language = 'English' | 'हिन्दी';
 export type AccountMenuItem = 'My Account' | 'Wishlist' | 'Sell' | 'Admin' | 'Setup' | 'Log out';
 
 export class HeaderComponent {
@@ -14,6 +16,8 @@ export class HeaderComponent {
   readonly loginButton: Locator;
   // The open menu renders in a portal at the end of <body>, outside the banner.
   private readonly openMenu: Locator;
+  // Labelled "Currency" in every language, although it also holds the language choice.
+  private readonly localeMenuButton: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('banner');
@@ -21,6 +25,7 @@ export class HeaderComponent {
     this.accountMenu = this.root.getByRole('button', { name: 'My Account' });
     this.loginButton = this.root.getByRole('button', { name: 'Log in' });
     this.openMenu = page.getByRole('menu');
+    this.localeMenuButton = this.root.getByRole('button', { name: 'Currency' });
   }
 
   accountMenuItem(name: AccountMenuItem): Locator {
@@ -29,8 +34,15 @@ export class HeaderComponent {
 
   @step()
   async chooseCurrency(currency: Currency): Promise<void> {
-    await this.root.getByRole('button', { name: 'Currency' }).click();
+    await this.localeMenuButton.click();
     await this.openMenu.getByRole('menuitem', { name: currency, exact: true }).click();
+  }
+
+  /** Language shares the globe menu with currency. */
+  @step()
+  async chooseLanguage(language: Language): Promise<void> {
+    await this.localeMenuButton.click();
+    await this.openMenu.getByRole('menuitem', { name: language, exact: true }).click();
   }
 
   @step()
