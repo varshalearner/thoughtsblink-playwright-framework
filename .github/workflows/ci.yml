@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Git hooks are for local commits; CI runs the same checks as explicit steps.
+  HUSKY: 0
+
+jobs:
+  checks:
+    name: Lint, types and format
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+
+  smoke:
+    name: Smoke tests
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # The official image, pinned to the same Playwright version as package.json: browsers and
+    # their system libraries are preinstalled, and screenshots render the same on every run.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+    env:
+      # Firefox refuses to start when $HOME belongs to another user, as in this container.
+      HOME: /root
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      BUYER_EMAIL: ${{ secrets.BUYER_EMAIL }}
+      BUYER_PASSWORD: ${{ secrets.BUYER_PASSWORD }}
+      ARTIST_EMAIL: ${{ secrets.ARTIST_EMAIL }}
+      ARTIST_PASSWORD: ${{ secrets.ARTIST_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # A pull request must not merge on a test that only passed on retry: flaky smoke tests
+      # fail the job (the nightly run reports flaky tests without failing).
+      - run: npx playwright test --grep @smoke --fail-on-flaky-tests
+      - name: Build the HTML report
+        if: ${{ !cancelled() }}
+        run: npx playwright merge-reports --reporter html ./blob-report
+      # A download on the run, not a public page: failed API calls can show tokens in reports.
+      - uses: actions/upload-artifact@v5
+        if: ${{ !cancelled() }}
+        with:
+          name: smoke-report
+          path: playwright-report/
+          retention-days: 14

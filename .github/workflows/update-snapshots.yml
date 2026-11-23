@@ -1,0 +1,44 @@
+name: Update screenshot baselines
+
+# Run by hand after an intended visual change. Baselines must come from the same container the
+# tests run in, or font rendering differs; the new images are uploaded for review and committed
+# by a person, not by the workflow.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: 0
+
+jobs:
+  update:
+    name: Generate Linux baselines
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+    env:
+      HOME: /root
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      BUYER_EMAIL: ${{ secrets.BUYER_EMAIL }}
+      BUYER_PASSWORD: ${{ secrets.BUYER_PASSWORD }}
+      ARTIST_EMAIL: ${{ secrets.ARTIST_EMAIL }}
+      ARTIST_PASSWORD: ${{ secrets.ARTIST_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright test --grep @visual --project=chromium --update-snapshots=all
+      - uses: actions/upload-artifact@v5
+        with:
+          name: linux-snapshots
+          path: tests/**/*-snapshots/*-linux.png
+          retention-days: 7
