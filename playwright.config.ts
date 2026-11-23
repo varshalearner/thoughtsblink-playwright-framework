@@ -23,8 +23,11 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    // API tests do not depend on a browser, so running them once per browser would only
+    // triple the run time and the logins against Supabase's auth rate limit.
+    { name: 'api', testDir: './tests/api' },
+    { name: 'chromium', testDir: './tests/ui', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', testDir: './tests/ui', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', testDir: './tests/ui', use: { ...devices['Desktop Safari'] } },
   ],
 });

@@ -24,9 +24,19 @@ dotenv.config({
   quiet: true,
 });
 
+const required = z.string().trim().min(1, 'is required');
+
 const schema = z.object({
   TEST_ENV: z.enum(ENV_NAMES).default('prod'),
   BASE_URL: z.url().optional(),
+  SUPABASE_URL: z.url(),
+  SUPABASE_ANON_KEY: required,
+  BUYER_EMAIL: z.email(),
+  BUYER_PASSWORD: required,
+  ARTIST_EMAIL: z.email(),
+  ARTIST_PASSWORD: required,
+  ADMIN_EMAIL: z.email(),
+  ADMIN_PASSWORD: required,
 });
 
 // Shell and CI secrets beat files; the first file in the list beats the later ones.
@@ -38,9 +48,23 @@ if (!parsed.success) {
   );
 }
 
-const name = parsed.data.TEST_ENV;
+const data = parsed.data;
+const name = data.TEST_ENV;
+
+export type Role = 'buyer' | 'artist' | 'admin';
+
+export interface Credentials {
+  email: string;
+  password: string;
+}
 
 export const env = {
   name,
-  baseURL: parsed.data.BASE_URL ?? ENVIRONMENTS[name].baseURL,
+  baseURL: data.BASE_URL ?? ENVIRONMENTS[name].baseURL,
+  supabase: { url: data.SUPABASE_URL, anonKey: data.SUPABASE_ANON_KEY },
+  accounts: {
+    buyer: { email: data.BUYER_EMAIL, password: data.BUYER_PASSWORD },
+    artist: { email: data.ARTIST_EMAIL, password: data.ARTIST_PASSWORD },
+    admin: { email: data.ADMIN_EMAIL, password: data.ADMIN_PASSWORD },
+  } satisfies Record<Role, Credentials>,
 } as const;
