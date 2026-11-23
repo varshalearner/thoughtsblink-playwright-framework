@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 import { step } from '@utils/step';
 
 export type MainNavLink = 'Browse Art' | 'Artists' | 'Commission' | 'Sell' | 'About';
+export type Currency = 'INR' | 'USD' | 'EUR' | 'GBP';
 export type AccountMenuItem = 'My Account' | 'Wishlist' | 'Sell' | 'Admin' | 'Setup' | 'Log out';
 
 export class HeaderComponent {
@@ -24,6 +25,12 @@ export class HeaderComponent {
 
   accountMenuItem(name: AccountMenuItem): Locator {
     return this.openMenu.getByRole('menuitem', { name });
+  }
+
+  @step()
+  async chooseCurrency(currency: Currency): Promise<void> {
+    await this.root.getByRole('button', { name: 'Currency' }).click();
+    await this.openMenu.getByRole('menuitem', { name: currency, exact: true }).click();
   }
 
   @step()

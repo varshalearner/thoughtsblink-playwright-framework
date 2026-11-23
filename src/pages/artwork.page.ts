@@ -8,10 +8,13 @@ export class ArtworkPage extends BasePage {
   protected readonly path = '/artwork';
 
   readonly title: Locator;
+  /** The price in the visitor's currency. A plain paragraph, so the app's test id is used. */
+  readonly price: Locator;
 
   constructor(page: Page) {
     super(page);
     this.title = page.getByRole('heading', { level: 1 });
+    this.price = page.getByTestId('detail-price');
   }
 
   async expectLoaded(): Promise<void> {
