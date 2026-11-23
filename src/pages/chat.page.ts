@@ -10,11 +10,19 @@ export class ChatPage extends BasePage {
   /** The scrolling list of messages; it has no accessible role, so the app's test id is used. */
   readonly messages: Locator;
   readonly messageInput: Locator;
+  private readonly sendButton: Locator;
 
   constructor(page: Page) {
     super(page);
     this.messages = page.getByTestId('chat-messages');
     this.messageInput = page.getByRole('textbox', { name: 'Message' });
+    this.sendButton = page.getByRole('button', { name: 'Send', exact: true });
+  }
+
+  @step()
+  async sendMessage(text: string): Promise<void> {
+    await this.messageInput.fill(text);
+    await this.sendButton.click();
   }
 
   async expectLoaded(): Promise<void> {
