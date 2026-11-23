@@ -2,12 +2,17 @@ import { test, expect } from '@fixtures';
 import { authFile } from '@utils/auth-state';
 
 test.describe('Account menu', () => {
-  test('a visitor is offered the login button', { tag: '@smoke' }, async ({ homePage }) => {
-    await homePage.open();
+  test(
+    'a visitor is offered the login button',
+    { tag: '@smoke' },
+    async ({ homePage, isMobile }) => {
+      test.skip(isMobile, 'phones offer Log in inside the menu (tests/ui/mobile)');
+      await homePage.open();
 
-    await expect(homePage.header.loginButton).toBeVisible();
-    await expect(homePage.header.accountMenu).toBeHidden();
-  });
+      await expect(homePage.header.loginButton).toBeVisible();
+      await expect(homePage.header.accountMenu).toBeHidden();
+    },
+  );
 
   test.describe('as a buyer', () => {
     test.use({ storageState: authFile('buyer') });

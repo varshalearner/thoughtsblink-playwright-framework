@@ -18,6 +18,9 @@ export class HeaderComponent {
   private readonly openMenu: Locator;
   // Labelled "Currency" in every language, although it also holds the language choice.
   private readonly localeMenuButton: Locator;
+  /** Phones only: the ☰ button and the navigation it opens. */
+  readonly mobileMenuButton: Locator;
+  readonly mobileNav: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('banner');
@@ -26,6 +29,8 @@ export class HeaderComponent {
     this.loginButton = this.root.getByRole('button', { name: 'Log in' });
     this.openMenu = page.getByRole('menu');
     this.localeMenuButton = this.root.getByRole('button', { name: 'Currency' });
+    this.mobileMenuButton = this.root.getByRole('button', { name: 'Menu' });
+    this.mobileNav = this.root.getByRole('navigation', { name: 'Mobile' });
   }
 
   accountMenuItem(name: AccountMenuItem): Locator {
@@ -48,6 +53,11 @@ export class HeaderComponent {
   @step()
   async openAccountMenu(): Promise<void> {
     await this.accountMenu.click();
+  }
+
+  @step()
+  async openMobileMenu(): Promise<void> {
+    await this.mobileMenuButton.click();
   }
 
   @step()

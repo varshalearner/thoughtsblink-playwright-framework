@@ -41,19 +41,37 @@ export default defineConfig({
       name: 'chromium',
       testDir: './tests/ui',
       dependencies: ['setup'],
+      grepInvert: /@mobile/,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'firefox',
       testDir: './tests/ui',
       dependencies: ['setup'],
+      grepInvert: /@mobile/,
       use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'webkit',
       testDir: './tests/ui',
       dependencies: ['setup'],
+      grepInvert: /@mobile/,
       use: { ...devices['Desktop Safari'] },
+    },
+    // Phones get the critical paths only: the smoke subset plus mobile-specific tests.
+    {
+      name: 'mobile-chrome',
+      testDir: './tests/ui',
+      grep: /@smoke|@mobile/,
+      dependencies: ['setup'],
+      use: { ...devices['Pixel 7'] },
+    },
+    {
+      name: 'mobile-safari',
+      testDir: './tests/ui',
+      grep: /@smoke|@mobile/,
+      dependencies: ['setup'],
+      use: { ...devices['iPhone 15'] },
     },
   ],
 });
