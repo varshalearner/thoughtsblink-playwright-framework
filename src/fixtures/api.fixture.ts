@@ -1,4 +1,5 @@
 import { test as base, type APIRequestContext, type PlaywrightWorkerArgs } from '@playwright/test';
+import { AppApiClient } from '@api/app.client';
 import { ListingsClient } from '@api/listings.client';
 import { signIn, supabaseHeaders, type Session } from '@api/supabase';
 import { env, type Role } from '@utils/env';
@@ -14,6 +15,8 @@ export interface SignedInApi extends SupabaseApi {
 }
 
 export interface ApiFixtures {
+  /** The app's Next.js API routes, called without signing in. */
+  appApi: AppApiClient;
   anonApi: SupabaseApi;
   buyerApi: SignedInApi;
   artistApi: SignedInApi;
@@ -44,6 +47,10 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
     { scope: 'worker' },
   ],
 
+  // The built-in request fixture already uses the project's baseURL, which is the app.
+  appApi: async ({ request }, use) => {
+    await use(new AppApiClient(request));
+  },
   anonApi: async ({ playwright }, use) => {
     await withRestContext(playwright, undefined, (request) => use(clientsFor(request)));
   },

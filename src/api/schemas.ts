@@ -46,5 +46,14 @@ export const postgrestErrorSchema = z.object({
   hint: z.string().nullable(),
 });
 
+const rate = z.number().positive();
+
+/** GET /api/exchange-rates: rates are units of each currency per 1 INR. */
+export const exchangeRatesSchema = z.object({
+  rates: z.object({ INR: z.literal(1), USD: rate, EUR: rate, GBP: rate }),
+  source: z.enum(['exchangerate-api', 'fallback']),
+  updatedAt: z.iso.datetime().optional(),
+});
+
 export type Listing = z.infer<typeof listingSchema>;
 export type ListingStatus = z.infer<typeof listingStatusSchema>;
